@@ -1,6 +1,6 @@
 """Keypair database management."""
 
-import binascii.Error
+import binascii
 import glob
 import os
 import stat
