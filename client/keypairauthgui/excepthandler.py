@@ -46,14 +46,26 @@ class ExceptHandler(object):
             message = name + ": " + str(value) + "."
             caption = name
         else:
+            #
             # Locale is known, attempt to translate the message and caption
+            #
+
+            # Translate the message if there is a translation
             try:
-                message = self._text[name][value.id]
+                message = self._text[name][value.id_string]
             except (AttributeError, KeyError):
                 try:
                     message = self._text[name][value]
                 except KeyError:
                     message = str(value)
+
+            # Format the message if the exception has a formatting attribute
+            try:
+                message = message.format(*value.formatting)
+            except AttributeError:
+                pass
+
+            # Translate the caption if there is a translation
             try:
                 caption = self._text[name]['__name__']
             except KeyError:

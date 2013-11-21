@@ -13,9 +13,9 @@ import osdirs
 from pkg_resources import resource_stream
 import wx
 
-from keypairauthgui.excepthandler import ExceptHandler
 from keypairauthgui import authenticator
 from keypairauthgui import keypairmanager
+from keypairauthgui.excepthandler import ExceptHandler
 
 # Configuration specification for default values and data types
 CONFIGSPEC = """
@@ -24,14 +24,6 @@ locale = option('en-int', default='en-int')
 [gui]
 keypair_files_syncer = integer(default=-1)
 """
-
-
-class ApplicationError(Exception):
-    """Raised if an error occurs while trying to start the application."""
-
-    def __init__(self, message, id=None):
-        Exception.__init__(self, message)
-        self.id = id
 
 
 class Application():
@@ -98,36 +90,30 @@ class Application():
             # No command-line arguments; start the keypair manager
             self._main_window = self._start_keypairmanager()
         else:
-            # Possible command-line arguments for authentication; start the
-            # authenticator
+            # Possible command-line arguments for authentication; parse the
+            # arguments and start the authenticator
             auth_query = urlparse.parse_qs(cl_args[1])
 
             try:
                 auth_url = auth_query['auth_url'][0]
             except KeyError:
-                raise ApplicationError("authentication URL not specified",
-                                       'auth_url_unspecified')
+                raise_e = ValueError("authentication URL not specified")
+                raise_e.id_string = 'auth_url_unspecified'
+                raise raise_e
 
             try:
                 auth_identity_assertion = auth_query['identity_assertion'][0]
             except KeyError:
-                raise ApplicationError("identity assertion string not"
-                                       + " specified",
-                                       'identity_assertion_unspecified')
+                raise_e = ValueError("identity assertion string not specified")
+                raise_e.id_string = 'identity_assertion_unspecified'
+                raise raise_e
 
             try:
                 auth_mode = auth_query['mode'][0]
             except KeyError:
-                raise ApplicationError("authentication mode not specified",
-                                       'auth_mode_unspecified')
-
-            if auth_mode == '0':
-                auth_mode = authenticator.MODE_REGISTER
-            elif auth_mode == '1':
-                auth_mode = authenticator.MODE_AUTH
-            else:
-                raise ApplicationError("invalid authentication mode specified",
-                                       'invalid_auth_mode')
+                raise_e = ValueError("authentication mode not specified")
+                raise_e.id_string = 'auth_mode_unspecified'
+                raise raise_e
 
             window = self._start_authenticator(auth_url,
                                                auth_identity_assertion,
@@ -165,10 +151,9 @@ class Application():
             except AttributeError:
                 pass
 
-    def _start_authenticator(self, auth_url, identity_assertion,
-                             mode=authenticator.MODE_AUTH):
+    def _start_authenticator(self, auth_url, identity_assertion, mode):
         """Start the authentication application."""
-        return authenticator.Authenticate(self._config, self._locale,
+        return authenticator.Authenticator(self._config, self._locale,
                                           self._keypairdb, auth_url,
                                           identity_assertion, mode)
 

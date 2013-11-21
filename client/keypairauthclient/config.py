@@ -134,9 +134,11 @@ class Config():
             except OSError:
                 # Could not move the configuration file
                 if not os.path.isfile(self._sentinel_filename):
-                    # Configuration is new; go ahead and write straight to the
-                    # temporary file
+                    # There is no sentinel file so the configuration is new;
+                    # go ahead and write straight to the temporary file
                     new_config = True
+                    # Create the sentinel file to symbolise that the
+                    # configuration is no longer new
                     sentinel_file_handle = open(self._sentinel_filename, 'w')
                     sentinel_file_handle.close()
                     break
@@ -155,7 +157,8 @@ class Config():
                         if e.errno == errno.ENOENT:
                             new_config = True
                             break
-                        # if config doesn't exist now, we're really screwed
+                        # "if config doesn't exist now, we're really screwed"
+                        # -sbp
                         raise
                 time.sleep(0.01)
 
@@ -209,8 +212,9 @@ class Config():
 
         # Calculate the additions and changes in the configuration since the
         # last synchronisation
-        new_items = dicttools.new(self._configobj_before_sync, self._configobj,
-                                  deepness=self._sync_deepness)
+        new_items = dicttools.new_items(self._configobj_before_sync,
+                                        self._configobj,
+                                        deepness=self._sync_deepness)
 
         # Load the new configuration
         self._sync_time = time.time()  # update config sync time
