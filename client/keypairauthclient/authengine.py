@@ -7,8 +7,8 @@ from urlparse import urlparse
 
 from cherrypy.wsgiserver import CherryPyWSGIServer
 
-MODE_REGISTER = 0
-MODE_AUTH = 1
+MODE_REGISTER = 'register'
+MODE_AUTH = 'auth'
 
 
 def verify_invocation(*args, **kwargs):
